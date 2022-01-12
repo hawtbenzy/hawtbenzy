@@ -1,0 +1,230 @@
+---
+title: "AirFrance Business Insights by Team 1 MBAN2 2021"
+author: "Team 1"
+date: "11/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+library(readxl)
+AFCSS <- read_excel("C:/Users/hawtb/OneDrive/Documents/DUAL DEGREE- BUSINESS ANALYTICS/MAIN/Data Science, R - DAT- 5302 -  FMBAN2/Air France Case Spreadsheet Supplement.xls", sheet = "DoubleClick")
+
+library("tm")
+library("SnowballC")
+
+#Assigning text to Keyword column
+text <- AFCSS$Keyword
+#Lists of 4510 observations in the AFCSS dataframe
+doc <- Corpus(VectorSource(text))
+#Displays 1,000 keywords, omitting 3510 entries due to max limit
+inspect(doc)
+
+#Cleaning the data- eliminate extra white spaces and assigning it to "docs"
+docs <- tm_map(doc, stripWhitespace)
+
+#Massaging the data- remove punctuation
+docs <- tm_map(docs, removePunctuation)
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, ",")
+docs <- tm_map(docs, toSpace, ".")
+docs <- tm_map(docs, toSpace, "2006::")
+
+dtm <- TermDocumentMatrix(doc)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 10)
+```
+
+## Interpretation 1
+
+This first section of the code is simply allowing us to read, understand the file(Air France) we are working with. Afterwards we massage and clean the data by breaking down each serach phrases to keywords, taking out the space and other strings to make each string a stand alone word.
+
+
+```{r }
+library(stringr)
+
+text_col_cleaner <- function(df,col_num) {
+  new_col_vector <- c()
+  for (i in 1:nrow(df)) {
+    if (is.character(df[,col_num]) == TRUE) {
+      clean_text <- str_replace_all(df[i,col_num], "[^[:alnum:]]", " ")
+      #gives an error not taking in the given parameters and can't find function
+      clean_text <- tolower(clean_text)
+      new_col_vector <- c(new_col_vector,clean_text)
+    } 
+    else {
+      next
+    }#close if-else
+  }#close for loop
+  result_df <- as.data.frame(cbind(df, new_col_vector))
+  return(result_df)
+}#close function
+
+d<-text_col_cleaner(d,1)
+
+word_graph <- set.seed(1234)
+
+library("wordcloud")
+library("RColorBrewer")
+
+wordcloud(words = d$new_col_vector, freq = d$freq, min.freq = 4, 
+          random.order=FALSE, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
+## Interpretation 2
+
+Here we are using visual aid to show most frequently searched keywords.
+We used a wordcloud library to implement this setting a condition of min. frequency of 4 should not be displayed.
+
+```{r Correlation, echo=FALSE, message=FALSE, warning=FALSE}
+#correlation between words
+findAssocs(dtm, terms = "cheap", corlimit = 0.05)
+findAssocs(dtm, terms = "paris", corlimit = 0.05)
+findAssocs(dtm, terms = "ticket", corlimit = 0.05)
+
+barplot(d[1:20,]$freq, las = 2, names.arg = d[1:20,]$word,
+        col ="lightblue", main ="Most frequent words",
+        ylab = "Word frequencies")
+
+
+#filtering first words 
+first_words <- d[1:20,]
+
+#Optimize ROA; Return on advertisement spend 
+#Revenue/Cost acquisition 
+
+ROA <- sum(AFCSS$Amount)/sum(AFCSS$`Total Cost`)
+
+```
+
+## Interpretation 3
+
+Afterwards we use our massaged data to find relative association of the top 3 keywords; cheap, paris, ticket. We made a bar plot to display the output. The team also found the Return On Advertisement (ROA) spend by dividing the sum total amount by the total cost. And here's the ROA Value -  `r ROA`
+
+```{r Factor level for Publisher Nmae, echo=FALSE, message=FALSE, warning=FALSE}
+#creating a dataframe
+publisher_l <- data.frame(AFCSS$`Publisher Name`, AFCSS$Clicks, AFCSS$`Avg. Cost per Click`, AFCSS$Impressions, AFCSS$Amount, AFCSS$`Total Cost`, AFCSS$`Total Volume of Bookings`)
+
+colnames(publisher_l)
+library(tidyverse)
+##turning the existing dataframe- publisher_l, into a tibble(a data frame with class factor)
+publisher_l <- as_tibble(publisher_l)
+
+names(publisher_l)[names(publisher_l) == "AFCSS..Publisher.Name."] <- "Publisher_name"
+names(publisher_l)[names(publisher_l) == "AFCSS.Clicks"] <- "Clicks"
+names(publisher_l)[names(publisher_l) == "AFCSS..Avg..Cost.per.Click."] <- "Avg_cost_per_click"
+names(publisher_l)[names(publisher_l) == "AFCSS.Impressions"] <- "Impressions"
+names(publisher_l)[names(publisher_l) == "AFCSS..Total.Cost."] <- "Total_cost"
+names(publisher_l)[names(publisher_l) == "AFCSS.Amount"] <- "Amount"
+names(publisher_l)[names(publisher_l) == "AFCSS..Total.Volume.of.Bookings."] <- "Total_vol_bookings"
+
+publisher_l$Publisher_name <- as.factor(publisher_l$Publisher_name)
+
+###################################### SUBSET BY FACTORS - ANALYZING INDIVIDUALLY
+
+Google_Global   <- subset (publisher_l, Publisher_name == "Google - Global")
+Google_US       <- subset (publisher_l, Publisher_name == "Google - US")
+MSN_Global      <- subset (publisher_l, Publisher_name == "MSN - Global")
+MSN_US          <- subset (publisher_l, Publisher_name == "MSN - US")
+Overture_Global <- subset (publisher_l, Publisher_name == "Overture - Global")
+Overture_US     <- subset (publisher_l, Publisher_name == "Overture - US")
+yahoo_US        <- subset (publisher_l, Publisher_name == "Yahoo - US")
+
+list_factor <- list(Google_Global,Google_US,MSN_Global,MSN_US,Overture_US,Overture_Global,yahoo_US)
+
+############################### ROA ########################################
+
+ROA_FUNCTION <-  function(df){
+  
+  ROA <- sum(df["Amount"])/sum(df["Total_cost"])
+  
+  return(ROA)
+  
+} # closing ROA_FUNCTION function
+
+sum(Google_US$Amount)/sum(Google_US$Total_cost)
+
+ROA_FUNCTION(Google_US)
+ROA_FUNCTION(Google_Global)
+ROA_FUNCTION(MSN_Global)
+ROA_FUNCTION(MSN_US)
+ROA_FUNCTION(Overture_Global)
+ROA_FUNCTION(Overture_US)
+ROA_FUNCTION(yahoo_US)
+
+list_factor[1]
+
+roa <- c()
+
+```
+
+## Interpretation 4
+
+Here we assign each Publisher variable to a factor level to enable us know the Publisher with the highest frequency and reducing the wordings in our data frame to numbers for easier analysis. 
+Remember our favorite data type in R programming language is numeric and our least favorite is the date type.-  `r roa`
+
+```{r Logistic Regression, echo=FALSE, message=FALSE, warning=FALSE}
+################################################################################
+# Cleansing the Match Type Data
+AFCSS$`Match Type` <- gsub("N/A", "", AFCSS$`Match Type`)
+
+### Logistic regression
+Binary_Ratio <- mean(AFCSS$`Engine Click Thru %`)
+#### creating a new column to store binary value
+AFCSS$binary <- c()
+
+#creating a for loop to assign 0's and 1's
+for(i in 1:nrow(AFCSS)){
+  
+  if(AFCSS$`Engine Click Thru %`[i] < Binary_Ratio){
+    AFCSS$binary[i] <- 0}
+  else{AFCSS$binary[i] <- 1
+  }
+}
+
+## Create a value for the training data
+train_index <- sample(1:nrow(AFCSS), size = 0.8*nrow(AFCSS))
+
+# Creating a dataset for the training data
+train_data <- AFCSS[train_index, ]
+test_data <- AFCSS[-train_index, ]
+
+colnames(AFCSS)
+
+my_logit <- glm(binary ~ Clicks + `Avg. Cost per Click` + Impressions + Amount,
+                data = train_data,
+                family = "binomial")
+
+summary(my_logit)
+
+```
+
+## Interpretation 5
+
+This coding section was used to carry our a logistic regression with our training and testing data to set a limit by getting a ratio from the mean Engine Click Thru %- `r 100*Binary_Ratio`%
+
+Click has the highest coefficient and as such has the highest impact `r summary(my_logit)`.
+
+```{r }
+library(caret)
+
+#Test the first ...
+my_prediction_testing <- predict(my_logit, AFCSS, type="response")
+
+#the confusion matrix function needs to build the factor based on numerical factor
+confusionMatrix(data= as.factor(as.numeric(my_prediction_testing > 0.05)),
+                reference= as.factor(as.numeric(AFCSS$binary)))
+```
+
+## Interpretation 6
+
+A confusion matrix was designed to build a factor based on the following:
+`r confusionMatrix`

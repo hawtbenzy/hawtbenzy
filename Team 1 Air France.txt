@@ -1,0 +1,761 @@
+######################### Mami, Li   Campaign, Keyword #######################
+
+################################ Renaming columns ############################
+
+names(Air_France)[names(Air_France) == "Publisher ID"] <- "Publisher_ID"
+names(Air_France)[names(Air_France) == "Publisher Name"] <- "Publisher_Name"
+names(Air_France)[names(Air_France) == "Keyword ID"] <- "Keyword_ID"
+names(Air_France)[names(Air_France) == "Match Type"] <- "Match_Type"
+names(Air_France)[names(Air_France) == "Keyword Group"] <- "Keyword_Group"
+names(Air_France)[names(Air_France) == "Bid Strategy"] <- "Bid_Strategy"
+names(Air_France)[names(Air_France) == "Keyword Type"] <- "Keyword_Type"
+names(Air_France)[names(Air_France) == "Search Engine Bid"] <- "Bid"
+names(Air_France)[names(Air_France) == "Click Charges"] <- "Click_Charges"
+names(Air_France)[names(Air_France) == "Avg. Cost per Click"] <- "Cost_per_Click"
+names(Air_France)[names(Air_France) == "Engine Click Thru %"] <- "Click_Rate"
+names(Air_France)[names(Air_France) == "Avg. Pos."] <- "Avg_Pos"
+names(Air_France)[names(Air_France) == "Trans. Conv. %"] <- "Conversion_Rate"
+names(Air_France)[names(Air_France) == "Total Cost/ Trans."] <- "Cost_per_Booking"
+names(Air_France)[names(Air_France) == "Amount"] <- "Total_Revenue"
+names(Air_France)[names(Air_France) == "Total Cost"] <- "Total_Cost"
+names(Air_France)[names(Air_France) == "Total Volume of Bookings"] <- "Bookings_Volume"
+
+
+Air_France$factor_publisher_name <- as.factor(Air_France$Publisher_Name)
+Air_France$factor_match_type <- as.factor(Air_France$Match_Type)
+Air_France$factor_status <- as.factor(Air_France$Status)
+Air_France$Keyword <- as.character(Air_France$Keyword)
+
+
+########################### ROA ########################
+Air_France$ROA <- c()
+for(i in 1:nrow(Air_France)){
+  Air_France$ROA[i] <- (Air_France$Total_Revenue[i]/Air_France$Total_Cost[i])
+}
+
+
+#labeling the campaigns in groups
+Air_France$Campaign_groups<- factor(x=Air_France$Campaign, 
+                                    levels = c("Air France Brand & French Destinations", "Air France Branded", "French Destinations", "Paris & France Terms", "Geo Targeted Atlanta", "Geo Targeted Boston",
+                                               "Geo Targeted Chicago", "Geo Targeted Cincinnati", "Geo Targeted DC", "Geo Targeted Detroit", "Geo Targeted Houston", "Geo Targeted Los Angeles", "Geo Targeted Miami",
+                                               "Geo Targeted New York", "Geo Targeted Philadelphia", "Geo Targeted San Francisco", "Geo Targeted Seattle", "Western Europe Destinations", "Business Class", "Air France Global Campaign",
+                                               "Outside Western Europe", "Google_Yearlong 2006", "General Terms", "Unassigned"),
+                                    labels= c(("Air France Brand & French Dest."),("Air France Brand & French Dest."),("Air France Brand & French Dest."),("Air France Brand & French Dest."),
+                                              ("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),("Geo_Targeted"),
+                                              ("Geo_Targeted"),("Geo_Targeted"),("Western Europe"),("Business Class"),("Global"),("Global"),("Global"),("General Terms & Unassigned"),("General Terms & Unassigned")))
+
+
+# Calling the ggplot2 library
+library(ggplot2)
+
+#Ploting campaign groups against ROA and Total Cost
+grt<-ggplot()+
+  geom_point(data=Air_France, aes(x=Campaign_groups, y=ROA), color='blue', alpha= 0.1)+
+  geom_point(data=Air_France, aes(x=Campaign_groups, y=Total_Cost), color='red', alpha= 0.1)+
+  ggtitle("ROA/Total Cost per Campaign Groups")
+
+#Calling the plotly library
+
+library(plotly)
+
+ggplotly(grt)#
+
+
+#Comparing Total cost and Total Revenue on campaigns
+
+gtrc<-ggplot(data=Air_France, aes(x=Total_Cost, y=Total_Revenue, color=Campaign_groups))+
+  geom_point(aes(alpha=0.1),shape=5)+ggtitle("Total Revenue/Total Cost per Campaign Groups")
+
+ggplotly(gtrc)#
+
+#Comparing Total Revenue per Campaign based on each Publisher
+gtrpublish<-ggplot(data=Air_France, aes(x=factor_publisher_name, y=sum(Total_Revenue), color=Campaign_groups))+
+  geom_col(aes(alpha=0.1),shape =5)+ggtitle("Total Revenue on Campaign Groups per Publishers")+  xlab("Publisher's Name") + ylab("Total Revenue")
+
+ggplotly(gtrpublish)#
+
+
+#Comparing ROA per campaign on Publishers
+
+gtrpublsroa<-ggplot(data=Air_France, aes(x=factor_publisher_name, y=ROA, color=Campaign_groups))+
+  geom_col(aes(alpha=0.1),shape =5)+ggtitle("ROA on Campaign Groups per Publishers")+  xlab("Publisher's Name") + ylab("ROA")
+
+ggplotly(gtrpublsroa)##
+
+
+############ Keyword
+for (i in 1:nrow(Air_France)){
+  if(Air_France$Keyword_Group[i] == "Air France"|Air_France$Keyword_Group[i] == "Air France Brand"|Air_France$Keyword_Group[i] == "Air France Website"|Air_France$Keyword_Group[i] == "Business Class - Generic"|Air_France$Keyword_Group[i] == "Google|Flights Relaunch"){Air_France$Keyword_Group_new[i] <- "Air France"}
+  else if(Air_France$Keyword_Group[i] == "Athens"|Air_France$Keyword_Group[i] == "France"|Air_France$Keyword_Group[i] == "Lyon"|Air_France$Keyword_Group[i] == "Marseille"|Air_France$Keyword_Group[i] == "Nice"|Air_France$Keyword_Group[i] == "Nice Branded"|Air_France$Keyword_Group[i] == "Paris"|Air_France$Keyword_Group[i] == "Paris Branded"|Air_France$Keyword_Group[i] == "Tour de France"|Air_France$Keyword_Group[i] == "Barcelona"|Air_France$Keyword_Group[i] == "Europe"|Air_France$Keyword_Group[i] == "Florence"|Air_France$Keyword_Group[i] == "Google|Athens"|Air_France$Keyword_Group[i] == "Google|Barcelona"|Air_France$Keyword_Group[i] == "Google|Europe"|Air_France$Keyword_Group[i] == "Google|Italy"|Air_France$Keyword_Group[i] == "Google|rabat"|Air_France$Keyword_Group[i] == "Google|Rome"|Air_France$Keyword_Group[i] == "Google|Spain"|Air_France$Keyword_Group[i] == "Italy"|Air_France$Keyword_Group[i] == "Madrid"|Air_France$Keyword_Group[i] == "Spain"){Air_France$Keyword_Group_new[i] <- "Europe"}
+  else if(Air_France$Keyword_Group[i] == "Unassigned"){Air_France$Keyword_Group_new[i] <- "Unassigned"}
+  else{
+    Air_France$Keyword_Group_new[i] <- "US"
+  }
+}
+
+#Air France  Group: 1
+#Europe      Group: 2
+#US          Group: 3
+#Unassigned  Group: 4
+Air_France$Keyword_Group_new_factor <- c()
+
+for(i in 1:nrow(Air_France)){
+  if(Air_France$Keyword_Group_new[i] == "Air France"){
+    Air_France$Keyword_Group_new_factor[i] <- 1
+  }else if(Air_France$Keyword_Group_new[i] == "Europe"){
+    Air_France$Keyword_Group_new_factor[i] <- 2
+  }else if(Air_France$Keyword_Group_new[i] == "US"){
+    Air_France$Keyword_Group_new_factor[i] <- 3
+  }else
+    Air_France$Keyword_Group_new_factor[i] <- 4
+  
+}
+
+#New Keyword Group
+
+keywordplot <- subset(x=Air_France, subset = (between(Air_France$ROA,1,500)))
+View(keywordplot)
+ggplot(keywordplot, aes(Keyword_Group_new, ROA)) + geom_boxplot() + facet_grid(.~Publisher_Name)
+
+
+library(ggplot2)
+
+gkey<-ggplot()+
+  geom_point(data=Air_France, aes(x=Keyword_Group_new, y=ROA), color='blue', alpha= 0.1)+
+  geom_point(data=Air_France, aes(x=Keyword_Group_new, y=Total_Cost), color='red', alpha= 0.1)
+
+library(plotly)
+
+ggplotly(gkey)#
+
+gkey2<-ggplot(data=Air_France, aes(x=Keyword_Group_new, y=Total_Revenue))+
+  geom_point(aes(alpha=0.1),shape =5, color='blue')
+
+ggplotly(gkey2)#
+
+
+
+gkeypublish<-ggplot(data=keywordplot, aes(x=ROA, y=factor_publisher_name, color=Keyword_Group_new))+
+  geom_point(aes(alpha=0.1),shape =5)
+
+ggplotly(gkeypublish)#
+
+gkeypublish2<-ggplot(data=Air_France, aes(x=factor_publisher_name, y=Total_Revenue, color=Keyword_Group_new))+
+  geom_point(aes(alpha=0.1),shape =5)
+
+ggplotly(gkeypublish2)#
+
+
+#################################### Yazi bind #######################3
+library(readxl)
+library(plotly)
+
+
+Air_France_yazi <- as.data.frame(Air_France_yazi)
+
+#install.packages("dplyr")
+#install.packages("tidyverse")
+library(dplyr)
+library(tidyverse)
+
+
+Air_France_yazi <- select(Air_France_yazi, -`Publisher ID`)
+Air_France_yazi <- select(Air_France_yazi, -`Keyword ID`)
+Air_France_yazi <- select(Air_France_yazi, -`Bid Strategy`)
+Air_France_yazi <- select(Air_France_yazi, -`Keyword Type`)
+
+
+Air_France_yazi$factor_publisher_name <- as.factor(Air_France_yazi$`Publisher Name`)
+Air_France_yazi$factor_match_type <- as.factor(Air_France_yazi$`Match Type`)
+Air_France_yazi$factor_status <- as.factor(Air_France_yazi$Status)
+Air_France_yazi$Keyword <- as.character(Air_France_yazi$Keyword)
+
+
+colnames(Air_France_yazi)
+
+new_colnames <- colnames(Air_France_yazi)
+new_colnames[c(1,3,5,8,10,11,13,14,15,16,18,19)] <- c("Publisher_Name","Match_Type","Keyword_Group",
+                                                      "Search_engine_bid","Click_charges","Avg_cost_click",
+                                                      "Engine_clickthru","Avg_Pos","Trans_Conversion", "Total_cost_trans",
+                                                      "Total_cost","Total_volume_booked")
+colnames(Air_France_yazi) <- new_colnames
+colnames(Air_France_yazi)
+
+######### Word Graph ###########
+
+# Install
+#install.packages("tm")  # for text mining
+#install.packages("SnowballC") # for text stemming
+#install.packages("wordcloud") # word-cloud generator 
+#install.packages("RColorBrewer") # color palettes
+#install.packages("stringr")
+
+library(stringr)
+
+#text_cleaning function for the dataframe
+text_col_cleaner <- function(df,col_num) {
+  new_col_vector <- c()
+  for (i in 1:nrow(df)) {
+    if (is.character(df[,col_num]) == TRUE) {
+      clean_text <- str_replace_all(df[i,col_num], "[^[:alnum:]]", " ")
+      clean_text <- tolower(clean_text)
+      new_col_vector <- c(new_col_vector,clean_text)
+    } else {
+      next
+    }#close if-else
+  }#close for loop
+  result_df <- as.data.frame(cbind(df, new_col_vector))
+  return(result_df)
+}#close func
+
+typeof(Air_France_yazi[,2])
+
+Air_France_yazi <- text_col_cleaner(Air_France_yazi, 2)
+
+colnames(Air_France_yazi)[23] <- "cleaned_keywords"
+
+
+# Load
+library(tm)
+library(SnowballC)
+library(RColorBrewer)
+library(wordcloud)
+
+#####Word Cloud and Most Frequent Terms
+
+text <- Air_France_yazi$cleaned_keywords
+doc <- Corpus(VectorSource(text))
+inspect(doc)
+
+# Eliminate extra white spaces
+docs <- tm_map(doc, stripWhitespace)
+
+
+dtm <- TermDocumentMatrix(doc)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 20)
+
+
+word_graph <- set.seed(1234)
+
+wordcloud(words = d$word, freq = d$freq, min.freq = 4,
+          random.order=FALSE,  
+          colors=brewer.pal(8, "Dark2"))
+
+
+findFreqTerms(dtm, lowfreq = 5)
+
+#correlation between words
+findAssocs(dtm, terms = "cheap", corlimit = 0.05)
+findAssocs(dtm, terms = "paris", corlimit = 0.05)
+findAssocs(dtm, terms = "ticket", corlimit = 0.05)
+
+
+yazi_1 <- barplot(d[1:20,]$freq, las = 2, names.arg = d[1:20,]$word,
+        col ="lightblue", main ="Most frequent words",
+        ylab = "Word frequencies")
+yazi_1
+
+buzzword_vec <- as.vector(d[1:20,1])
+
+#Categorizing Buzzwords
+word_checker <- function(df, col_name, word_vec) {
+  word_classes <- c()
+  for (i in 1:nrow(df)) {
+    for (j in 1:length(word_vec)) {
+      word_classes[i] <- "other"
+      if ((grepl("air", df[i,col_name]) == TRUE && grepl("france", df[i,col_name]) == TRUE) | grepl("airfrance", df[i,col_name]) == TRUE ) {
+        word_classes[i] <- "airfrance_native"
+        break
+      } else if (grepl(word_vec[j], df[i,col_name]) == TRUE) {
+        word_classes[i] <- word_vec[j]
+        break
+      }#close if
+    }#close inner loop
+  }#close outer loop
+  return(word_classes)
+}#close func
+
+class_column <- word_checker(Air_France_yazi, "cleaned_keywords", buzzword_vec)
+class_column
+
+#add the new column of frequent classes for regression analysis
+Air_France_yazi$word_class <- class_column
+Air_France_yazi$word_class <- as.factor(Air_France_yazi$word_class)
+
+str(Air_France_yazi$word_class)
+summary(Air_France_yazi$word_class)
+
+#amount of revenue generated by different keyword searches in different word classes
+yazi_2 <- ggplot() +
+  geom_point(data= Air_France_yazi, aes(x= word_class, y = Amount/1000), color = "blue", alpha = 0.8) + 
+  ggtitle("Revenue Generated by Word Group Entry") +
+  xlab("Word Class") + ylab("Revenue(K)")
+yazi_2
+
+#word class average ad position by publishers
+yazi_3 <- ggplot() +
+  geom_boxplot(data= Air_France_yazi, aes(x= word_class, y = Air_France_yazi$Avg_Pos), color = "black", alpha = 0.45) +
+  ylim(0,6) +
+  geom_hline(yintercept = 1 , color = "red") +
+  geom_hline(yintercept = 2, color = "red") +
+  ggtitle("Ad Positioning Per Word Class") +
+  xlab("Word Class") + ylab("Ad Position")
+yazi_3
+
+yazi_4 <- ggplot() +
+  geom_boxplot(data= Air_France_yazi, aes(x= word_class, y = Air_France_yazi$Avg_Pos), color = "black", alpha = 0.45) +
+  ylim(0,6) +
+  facet_wrap(vars(Air_France_yazi$Publisher_Name))+
+  ggtitle("Ad Positioning Per Word Class Per Publisher") +
+  xlab("Word Class") + ylab("Ad Position")
+yazi_4
+
+###Focusing on overture US
+yazi_5 <- ggplot() +
+  geom_boxplot(data= Air_France_yazi[which(Air_France_yazi$Publisher_Name == "Overture - US"),], aes(x= word_class, y = Avg_Pos), color = "black", alpha = 0.45) +
+  ylim(0,6) +
+  geom_hline(yintercept = 1 , color = "red") +
+  geom_hline(yintercept = 2, color = "red") +
+  ggtitle("Overture US Ad Positions") +
+  xlab("Word Class") + ylab("Ad Position")
+yazi_5
+
+
+#calculating total revenues per wordclass through stacked chart
+yazi_6 <- ggplot(data = Air_France_yazi, aes(fill= Publisher_Name, y= Amount/1000, x= word_class)) + 
+  geom_bar(position="stack", stat= "identity") +
+  ggtitle("Total Revenue Generated by Word Class") +
+  xlab("Word Class") + ylab("Revenue(K)") +
+  coord_flip()
+yazi_6
+
+#calculating total revenues of word classes except "airfrance_native"
+yazi_7 <- ggplot(data = Air_France_yazi[-which(Air_France_yazi$word_class == "airfrance_native"),], aes(fill= Publisher_Name, y= Amount/1000, x= word_class)) + 
+  geom_bar(position="stack", stat= "identity") + 
+  ggtitle("Total Revenue Generated except 'airfrance") +
+  xlab("Word Class") + ylab("Revenue(K)") +
+  coord_flip()
+yazi_7
+
+#Revenue returns displayed with match types
+yazi_8 <- ggplot(data = Air_France_yazi[-which(Air_France_yazi$word_class == "airfrance_native"),], aes(fill= factor_match_type, y= Amount/1000, x= word_class)) + 
+  geom_bar(position="stack", stat= "identity") +
+  ggtitle("Total Revenue Generated by Word Class by Match Type") +
+  xlab("Word Class") + ylab("Revenue(K)") +
+  coord_flip()
+yazi_8
+
+yazi_9 <- ggplot(data = Air_France_yazi[which(Air_France_yazi$word_class == "airfrance_native"),], aes(fill= factor_match_type, y= Amount/1000, x= word_class)) + 
+  geom_bar(position="stack", stat= "identity") +
+  ggtitle("Total Revenue Generated by AirFrance Word Class by Match Type") +
+  xlab("Word Class") + ylab("Revenue(K)")
+yazi_9
+
+
+############## ROA on Word Class ################
+#Ratio of total revenue from airfrance_native word class
+total_revenue_airfrance <- sum(Air_France_yazi$Amount[which(Air_France_yazi$word_class == "airfrance_native")])
+total_cost_airfrance <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "airfrance_native")])
+total_revenue_others <- sum(Air_France_yazi$Amount) - total_revenue_airfrance
+total_cost_others <- sum(Air_France_yazi$Total_cost) - total_cost_airfrance
+total_revenue_airfrance/sum(Air_France_yazi$Amount)
+
+airfrance_native_roa <- total_revenue_airfrance / total_cost_airfrance
+airfrance_native_roa
+other_wordclass_roa <- total_revenue_others / total_cost_others
+other_wordclass_roa
+
+#calculating for most valuable 5 other most valuable word_classes
+total_revenue_flight <- sum(Air_France_yazi$Amount[which(Air_France_yazi$word_class == "flight")])
+total_cost_flight <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "flight")])
+roa_flight <- total_revenue_flight / total_cost_flight
+roa_flight
+
+total_revenue_ticket  <- sum(Air_France_yazi$Amount[which(Air_France_yazi$word_class == "ticket")])
+total_cost_ticket <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "ticket")])
+roa_ticket <- total_revenue_ticket / total_cost_ticket
+roa_ticket
+
+total_revenue_cheap  <- sum(Air_France_yazi$Amount[which(Air_France_yazi$word_class == "cheap")])
+total_cost_cheap <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "cheap")])
+roa_cheap <- total_revenue_cheap / total_cost_cheap
+roa_cheap
+
+total_revenue_paris  <- sum(Air_France_yazi$Amount[which(Air_France_yazi$word_class == "paris")])
+total_cost_paris <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "paris")])
+roa_paris <- total_revenue_paris / total_cost_paris
+roa_paris
+
+roa_top5_yaiz <- c(roa_cheap,roa_flight,roa_paris,roa_ticket,airfrance_native_roa)
+roa_names_yaiz <- c("Cheap", "Flight", "Paris", "Ticket", "AirFrance")
+roa_df_yaiz <- as.data.frame(cbind(roa_names_yaiz,roa_top5_yaiz))
+colnames(roa_df_yaiz) <- c("Word", "RoA")
+roa_df_yaiz$RoA <- as.numeric(roa_df_yaiz$RoA)
+
+
+yazi_10 <- ggplot(data=roa_df_yaiz, aes(x= Word, y= RoA), color = "green" , label = round(RoA,2)) +
+  geom_point(color = "green") +
+  geom_text(aes(label= round(RoA,2)),hjust=0, vjust=0 , color = "dark green") +
+  ggtitle("Return on Ads of 5 Top Words") +
+  xlab("Word Class") + ylab("RoA")
+yazi_10
+
+
+######Ad Costs of under performing word classes#######
+
+underperf_cost <- sum(Air_France_yazi$Total_cost[which(Air_France_yazi$word_class == "europe"|
+                                                         Air_France_yazi$word_class == "fare"|
+                                                         Air_France_yazi$word_class == "international"|
+                                                         Air_France_yazi$word_class == "italy" |
+                                                         Air_France_yazi$word_class == "nice" |
+                                                         Air_France_yazi$word_class == "rome" |
+                                                         Air_France_yazi$word_class =="other")])
+underperf_cost
+
+
+
+
+
+
+
+############################# Arni Matchtype #######################
+library(readxl)
+Air_France <- read_excel("~/Documents/Study/2020/R/Air France Case.xls")
+View(Air_France)
+
+Air_France
+
+colnames(Air_France)
+
+
+
+
+library(dplyr)
+
+matchtype_1  <- data.frame(Air_France$`Match Type`,Air_France$Clicks,Air_France$`Avg. Cost per Click`,Air_France$Impressions,
+                           Air_France$Amount, Air_France$`Total Cost`,Air_France$`Total Volume of Bookings`)
+
+colnames(matchtype_1)
+############ using tidyverse to ravel all the related pakages #########3
+####install.packages("tidyverse")
+library(tidyverse)
+matchtype_1 <- as_tibble(matchtype_1)
+
+names(matchtype_1)[names(matchtype_1) == "Air_France..Match.Type."] <- "Match_Type"
+names(matchtype_1)[names(matchtype_1) == "Air_France.Clicks"] <- "Clicks"
+names(matchtype_1)[names(matchtype_1) == "Air_France..Avg..Cost.per.Click."] <- "Avg_cost_per_click"
+names(matchtype_1)[names(matchtype_1) == "Air_France.Impressions"] <- "Impressions"
+names(matchtype_1)[names(matchtype_1) == "Air_France..Total.Cost."] <- "Total_cost"
+names(matchtype_1)[names(matchtype_1) == "Air_France.Amount"] <- "Amount"
+names(matchtype_1)[names(matchtype_1) == "Air_France..Total.Volume.of.Bookings."] <- "Total_vol_bookings"
+
+
+matchtype_1$Match_Type <- as.factor(matchtype_1$Match_Type)
+
+
+### SUBSET BY FACTORS ################
+
+Exact   <- subset (matchtype_1, Match_Type == "Exact")
+Standard       <- subset (matchtype_1, Match_Type == "Standard")
+Advanced      <- subset (matchtype_1, Match_Type == "Advanced")
+Broad          <- subset (matchtype_1, Match_Type == "Broad")
+
+
+############ using list()#############33
+list_factor <- list(Exact,Standard,Advanced,Broad)
+
+
+###### ROA function ################33
+
+ROA_FUNCTION <-  function(df){
+  
+  ROA <- sum(df["Amount"])/sum(df["Total_cost"])
+  
+  return(ROA)
+  
+} # closing ROA_FUNCTION function
+
+
+ROA_FUNCTION(Exact)
+ROA_FUNCTION(Standard)
+ROA_FUNCTION(Advanced)
+ROA_FUNCTION(Broad)
+
+list_factor[1]
+
+roa <- c()
+
+Roa_df <- as.data.frame(matrix(ncol=2, nrow = 7))
+
+
+for (i in list_factor){
+  x <- ROA_FUNCTION(i)
+  roa <- c(roa,x)
+}
+
+
+length(roa)
+
+
+rownames(Roa_df) <- c("Exact","Standard","Advanced","Broad")
+name <- c("Exact","Standard","Advanced","Broad")
+type <- c("Exact","Standard","Advanced","Broad")
+
+amount <- c()
+
+
+sum_func <-  function(df){
+  
+  X <- sum(df["Amount"])
+  return(X)
+}
+
+for (i in list_factor){
+  y <- sum_func(i)
+  amount <- c(amount, y)
+}
+
+
+
+Roa_df$roa_1 <- roa
+Roa_df$type <- type
+Roa_df$amount <- amount
+
+
+
+
+Roa_df <- select(Roa_df, - roa)
+
+#### plot roa  ########
+library(ggplot2)
+
+roa_chart <-ggplot(Roa_df, aes(x=type, y = roa_1 )) +
+  geom_bar(color = "red", fill="red",stat = "identity") + coord_flip()+
+  scale_fill_brewer(palette = 1) + ggtitle("Match Type") +
+  theme(plot.title = element_text(color="Black", size=14, face="bold.italic"))
+library(plotly)
+
+ggplotly(roa_chart)
+
+### amount by match type in thousands
+
+amount_chart <-ggplot(Roa_df, aes(x=type, y = amount/1000 )) +
+  geom_bar(color = "red", fill="red",stat = "identity") + coord_flip()+
+  scale_fill_brewer(palette = 1) + ggtitle("Match Type") +
+  theme(plot.title = element_text(color="Black", size=14, face="bold.italic"))
+library(plotly)
+
+ggplotly(amount_chart)
+
+#####################################
+library(rockchalk)
+
+Air_France_1 <- Air_France
+
+Air_France_1$`Match Type`   <- combineLevels(Air_France_1$`Match Type`,levs = c("Exact","Standard","Advanced","Broad"), newLabel = c("US") )
+Air_France_1$`Match Type`   <- combineLevels(Air_France_1$`Match Type`,levs = c("Exact","Standard","Advanced","Broad"), newLabel = c("Global") )
+
+Global   <- subset (Air_France_1, `Match Type` == "Global")
+US      <- subset (Air_France_1, `Match Type` == "US")
+
+
+summary(Global)
+summary(US)
+
+ROA_FUNCTION(Global)
+ROA_FUNCTION(US)
+
+#Geo target
+plot_ly(data=Air_France_1, x=~Clicks, y=~Amount, color=~`Match Type`)
+
+#plot by match type
+plot_ly(data=Air_France, x=~Clicks, y=~Amount, color=~ `Match Type`)
+
+
+library(ggplot2)
+library(plotly)
+#####install.packages("gapminder")
+library(gapminder)
+
+
+ggplotly(geo)
+
+# bubble plot by geo target
+geo <- ggplot(Air_France_1, aes(x=Clicks, y=Amount/1000, size = `Total Cost`,color= `Match Type`)) +
+  geom_point(alpha=0.7) + ggtitle("US vs Global n/ Revenue vs Click") +
+  theme(plot.title = element_text(color="Black", size=14, face="bold.italic"))
+
+
+ggplotly(geo)
+
+
+########### Logistic regression for global
+
+
+Air_France_1$binary <- (as.numeric(Air_France_1$`Match Type`)-2)^2
+
+#create a value for the training data
+train_index <- sample(1:nrow(Air_France_1),
+                      size = 0.8*nrow(Air_France_1))
+
+#creating dataset for the training data
+train_data <- Air_France_1[train_index,]
+test_data <- Air_France_1[-train_index, ]
+
+colnames(Air_France_1)
+
+my_logit <- glm(binary ~ Clicks + `Avg. Cost per Click` + Impressions + Amount + `Total Cost` + `Total Volume of Bookings`,
+                data = train_data,
+                #how we tell r that is a logistic regression
+                family = "binomial")
+
+
+summary(my_logit)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################ Ari Match type #############################
+
+
+library(dplyr)
+
+matchtype_1  <- data.frame(Air_France_Ari$`Match Type`,Air_France_Ari$Clicks,Air_France_Ari$`Avg. Cost per Click`,Air_France_Ari$Impressions,
+                           Air_France_Ari$Amount, Air_France_Ari$`Total Cost`,Air_France_Ari$`Total Volume of Bookings`)
+
+colnames(matchtype_1)
+############ using tidyverse to ravel all the related pakages #########3
+####install.packages("tidyverse")
+library(tidyverse)
+matchtype_1 <- as_tibble(matchtype_1)
+
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari..Match.Type."] <- "Match_Type"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari.Clicks"] <- "Clicks"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari..Avg..Cost.per.Click."] <- "Avg_cost_per_click"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari.Impressions"] <- "Impressions"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari..Total.Cost."] <- "Total_cost"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari.Amount"] <- "Amount"
+names(matchtype_1)[names(matchtype_1) == "Air_France_Ari..Total.Volume.of.Bookings."] <- "Total_vol_bookings"
+
+
+matchtype_1$Match_Type <- as.factor(matchtype_1$Match_Type)
+
+
+### SUBSET BY FACTORS ################
+
+Exact   <- subset (matchtype_1, Match_Type == "Exact")
+Standard       <- subset (matchtype_1, Match_Type == "Standard")
+Advanced      <- subset (matchtype_1, Match_Type == "Advanced")
+Broad          <- subset (matchtype_1, Match_Type == "Broad")
+
+
+############ using list()#############33
+list_factor <- list(Exact,Standard,Advanced,Broad)
+
+######### Word Graph ###########
+
+# Install
+##install.packages("tm")  # for text mining
+###install.packages("SnowballC") # for text stemming
+####install.packages("wordcloud") # word-cloud generator 
+#####install.packages("RColorBrewer") # color palettes
+# Load
+
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+
+
+###### ROA function ################33
+
+ROA_FUNCTION <-  function(df){
+  
+  ROA <- sum(df["Amount"])/sum(df["Total_cost"])
+  
+  return(ROA)
+  
+} # closing ROA_FUNCTION function
+
+
+ROA_FUNCTION(Exact)
+ROA_FUNCTION(Standard)
+ROA_FUNCTION(Advanced)
+ROA_FUNCTION(Broad)
+
+list_factor[1]
+
+roa <- c()
+
+Roa_df <- as.data.frame(matrix(ncol=2, nrow = 7))
+
+
+for (i in list_factor){
+  x <- ROA_FUNCTION(i)
+  roa <- c(roa,x)
+}
+
+
+length(roa)
+
+
+Roa_df <- c("Exact","Standard","Advanced","Broad")
+name <- c("Exact","Standard","Advanced","Broad")
+type <- c("Exact","Standard","Advanced","Broad")
+
+sum_func <-  function(df){
+  
+  X <- sum(df["Amount"])
+  return(X)
+}
+
+for (i in list_factor){
+  y <- sum_func(i)
+  amount <- c(amount, y)
+}
+
+
+Roa_df$roa_1 <- roa
+Roa_df$type <- type
+Roa_df$amount <- amount
+
+
+
+
+
+
+
+######install.packages("rockchalk")
+library(rockchalk)
+
+Air_France_2 <- Air_France_Ari
+
+Air_France_2$`Match Type`   <- combineLevels(Air_France_2$`Match Type`,levs = c("Exact","Standard","Advanced","Broad"), newLabel = c("US") )
+Air_France_2$`Match Type`   <- combineLevels(Air_France_2$`Match Type`,levs = c("Exact","Standard","Advanced","Broad"), newLabel = c("Global") )
+
+Global   <- subset (Air_France_2, `Match Type` == "Global")
+US      <- subset (Air_France_2, `Match Type` == "US")
+
+
+summary(Global)
+summary(US)
+
+#plot by match type
+plot_ly(data=Air_France_Ari, x=~Clicks, y=~Amount, color=~ `Match Type`)
+
+
+
