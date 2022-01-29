@@ -1,0 +1,41 @@
+TEXT ADVENTURE GAME IN PYTHON
+
+CONSPIRACY THEORY 
+
+LEVEL 1
+-------------------------------------------------------------------------------
+Welcome onbaord {username}, 😃
+      
+Right now you wake up from a night mare and you find yourself in scrubs standing in the hospital. 
+What do you do next;
+(Pick an option) 
+Option A 
+Run away from the hospital... 
+Option B- 
+Wander around the hospital to find clues around.
+
+-------------------------------------------------------------------------------
+
+LEVEL 2
+-------------------------------------------------------------------------------
+Option A or B-
+You find a clue;
+You're in the foyer and the hallway continues to the south.
+You see the nurses running in a surgery room and ask 'What is happening...'
+You follow the nurses to see what was happening in the surgery room and realise:
+
+ou respond; Oh, No! 🤭
+over {input2} medical personnels around
+ex-{input3}'s somehwat lifeless body on the surgerical table.
+-------------------------------------------------------------------------------
+LEVEL 3
+-------------------------------------------------------------------------------
+Synopsis- You see the {input2} medical personnels harvesting the organs of your ex-{input3} 🤭 
+Pull yourself together {username}, we can stop this, you think out loud 🤔
+
+You see a phone and pager
+
+Which do you pick first ____ ? 
+
+--------------------------------------------------------------------------------
+TO BE CONTINUED...
