@@ -1,8 +1,8 @@
 - 👋 Hi, I’m @hawtbenzy, fondly known as Benedicta
-- 👀 I’m interested in starting a career journey as a Product Manager.
-- 🌱 I’m currently learning R programming language, Tableau, Python, SQL, Machine Learning 
-- 💞️ I’m looking to data optimization, as that's a passion I have
-- 📫 Feel free to reach me on benedictaoruerio@gmail.com 
+- 👀 Follow me on my journey as a Quality Analyst.
+- 🌱 I have the following technical skillsets; R programming language, Tableau, Python, SQL, Machine Learning 
+- 💞️ I am vast in data optimization and I am passionate about sustanability.
+- 📫 Feel free to reach me at benedictaoruerio@gmail.com for collaborations and consulations.
 
 <!---
 hawtbenzy/hawtbenzy is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
