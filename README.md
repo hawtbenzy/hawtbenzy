@@ -1,4 +1,4 @@
-- 👋 Hi, I’m @hawtbenzy, fondly known as Benedicta
+- 👋 Hi, I am Benedicta O
 - 👀 Follow me on my journey as a Quality Analyst.
 - 🌱 I have the following technical skillsets: R programming language, Tableau, Python, SQL, and Machine Learning 
 - 💞️ I am vast in data optimization, and I am passionate about sustainability.
